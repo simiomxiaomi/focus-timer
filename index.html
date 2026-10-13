@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="纯前端零依赖的番茄钟 / 专注计时器">
+<title>番茄钟 · 专注计时器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-mode="focus">
+<div class="app">
+
+  <!-- 顶部标题 -->
+  <header class="app-header">
+    <h1 class="app-title"><span class="brand-dot" aria-hidden="true"></span>番茄钟</h1>
+    <p class="app-subtitle">保持专注，好好休息</p>
+  </header>
+
+  <!-- 模式切换 -->
+  <nav class="mode-switch" id="modeSwitch" aria-label="模式切换">
+    <button class="mode-btn is-active" type="button" data-mode="focus">专注</button>
+    <button class="mode-btn" type="button" data-mode="short">短休息</button>
+    <button class="mode-btn" type="button" data-mode="long">长休息</button>
+  </nav>
+
+  <!-- 计时主区 -->
+  <main class="timer-card">
+    <div class="ring-wrap">
+      <svg class="ring" viewBox="0 0 280 280" role="img" aria-label="当前阶段剩余时间进度环">
+        <defs>
+          <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f97316"/>
+            <stop offset="55%" stop-color="#fb7185"/>
+            <stop offset="100%" stop-color="#fbbf24"/>
+          </linearGradient>
+          <filter id="ringGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <circle class="ring-track" id="ringTrack" cx="140" cy="140" r="120"/>
+        <circle class="ring-progress" id="ringProgress" cx="140" cy="140" r="120"
+                transform="rotate(-90 140 140)" filter="url(#ringGlow)"/>
+      </svg>
+      <div class="ring-center">
+        <div class="phase-label" id="phaseLabel">专注</div>
+        <div class="time-display" id="timeDisplay">25:00</div>
+        <div class="phase-hint" id="phaseHint">准备开始</div>
+      </div>
+    </div>
+
+    <!-- 控制按钮 -->
+    <div class="controls">
+      <button class="btn btn-primary" id="startPauseBtn" type="button">▶ 开始</button>
+      <button class="btn" id="resetBtn" type="button">↺ 重置</button>
+      <button class="btn" id="skipBtn" type="button">⏭ 跳过</button>
+    </div>
+  </main>
+
+  <!-- 今日统计 -->
+  <section class="panel stats-panel" aria-label="今日统计">
+    <h2 class="panel-title">今日统计</h2>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-value" id="todayCount">0</div>
+        <div class="stat-label">已完成专注（个）</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="todayMinutes">0</div>
+        <div class="stat-label">累计专注（分钟）</div>
+      </div>
+    </div>
+    <div class="tomato-bar" id="tomatoBar"></div>
+  </section>
+
+  <!-- 设置 -->
+  <section class="panel settings-panel" aria-label="设置">
+    <h2 class="panel-title">设置</h2>
+
+    <div class="duration-list">
+      <div class="duration-row">
+        <span class="duration-name">专注</span>
+        <div class="stepper">
+          <button class="step-btn" type="button" data-stepper data-mode="focus" data-delta="-1" aria-label="减少专注分钟">−</button>
+          <input class="step-input" id="durationFocus" type="number" min="1" max="180" step="1" value="25" inputmode="numeric" aria-label="专注分钟数">
+          <button class="step-btn" type="button" data-stepper data-mode="focus" data-delta="1" aria-label="增加专注分钟">+</button>
+          <span class="step-unit">分钟</span>
+        </div>
+      </div>
+
+      <div class="duration-row">
+        <span class="duration-name">短休息</span>
+        <div class="stepper">
+          <button class="step-btn" type="button" data-stepper data-mode="short" data-delta="-1" aria-label="减少短休息分钟">−</button>
+          <input class="step-input" id="durationShort" type="number" min="1" max="180" step="1" value="5" inputmode="numeric" aria-label="短休息分钟数">
+          <button class="step-btn" type="button" data-stepper data-mode="short" data-delta="1" aria-label="增加短休息分钟">+</button>
+          <span class="step-unit">分钟</span>
+        </div>
+      </div>
+
+      <div class="duration-row">
+        <span class="duration-name">长休息</span>
+        <div class="stepper">
+          <button class="step-btn" type="button" data-stepper data-mode="long" data-delta="-1" aria-label="减少长休息分钟">−</button>
+          <input class="step-input" id="durationLong" type="number" min="1" max="180" step="1" value="15" inputmode="numeric" aria-label="长休息分钟数">
+          <button class="step-btn" type="button" data-stepper data-mode="long" data-delta="1" aria-label="增加长休息分钟">+</button>
+          <span class="step-unit">分钟</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="switch-list">
+      <label class="switch-row" for="soundToggle">
+        <span class="switch-text">阶段切换提示音</span>
+        <span class="switch">
+          <input type="checkbox" id="soundToggle" checked>
+          <span class="switch-slider" aria-hidden="true"></span>
+        </span>
+      </label>
+
+      <label class="switch-row" for="autoToggle">
+        <span class="switch-text">自动开始下一阶段</span>
+        <span class="switch">
+          <input type="checkbox" id="autoToggle">
+          <span class="switch-slider" aria-hidden="true"></span>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  <footer class="app-footer">
+    <kbd>空格</kbd> 开始 / 暂停 &nbsp;·&nbsp; <kbd>R</kbd> 重置 &nbsp;·&nbsp; <kbd>S</kbd> 跳过
+  </footer>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
